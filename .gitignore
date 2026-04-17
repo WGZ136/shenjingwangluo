@@ -1,0 +1,46 @@
+# Python虚拟环境
+venv/
+env/
+ENV/
+
+# Python缓存
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# 输出目录
+captures/
+captures_esp32/
+output/
+*.log
+
+# 模型权重 (大文件，使用Git LFS或单独下载)
+# core_algorithms/mono+stereo_640x192/*.pth
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# 临时文件
+*.tmp
+*.bak
+*.orig
+
+# 数据文件
+*.npy
+*.npz
+*.pkl
+*.h5
+*.hdf5
