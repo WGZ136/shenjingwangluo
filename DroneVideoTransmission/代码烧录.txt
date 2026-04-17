@@ -174,23 +174,23 @@ void loop() {
 #include "esp_camera.h"
 #include "WiFi.h"
 
-// 摄像头引脚定义（ESP32-S3-CAM）
-#define PWDN_GPIO_NUM     -1
-#define RESET_GPIO_NUM    -1
-#define XCLK_GPIO_NUM     10
-#define SIOD_GPIO_NUM     40
-#define SIOC_GPIO_NUM     39
-#define Y9_GPIO_NUM       48
-#define Y8_GPIO_NUM       11
-#define Y7_GPIO_NUM       12
-#define Y6_GPIO_NUM       14
-#define Y5_GPIO_NUM       16
-#define Y4_GPIO_NUM       18
-#define Y3_GPIO_NUM       17
-#define Y2_GPIO_NUM       15
-#define VSYNC_GPIO_NUM    38
-#define HREF_GPIO_NUM     47
-#define PCLK_GPIO_NUM     13
+// 20脚 OV2640 摄像头模组 (常见引脚定义)
+#define PWDN_GPIO_NUM     -1   // 通常20脚模组不带PWDN控制，填-1
+#define RESET_GPIO_NUM    -1   // 通常20脚模组不带RESET控制，填-1
+#define XCLK_GPIO_NUM     15   // 外部时钟引脚
+#define SIOD_GPIO_NUM      4   // SCCB/I2C 数据引脚
+#define SIOC_GPIO_NUM      5   // SCCB/I2C 时钟引脚
+#define Y9_GPIO_NUM       16   // D7 (MSB)
+#define Y8_GPIO_NUM       17   // D6
+#define Y7_GPIO_NUM       18   // D5
+#define Y6_GPIO_NUM       12   // D4
+#define Y5_GPIO_NUM       10   // D3
+#define Y4_GPIO_NUM        8   // D2
+#define Y3_GPIO_NUM        9   // D1
+#define Y2_GPIO_NUM       11   // D0 (LSB)
+#define VSYNC_GPIO_NUM     6   // 垂直同步
+#define HREF_GPIO_NUM      7   // 水平参考/同步
+#define PCLK_GPIO_NUM     13   // 像素时钟
 
 // WiFi设置 - 使用不同的IP段避免冲突
 const char* ssid = "Drone_Cam_Rear";   // 下视摄像头WiFi名称
