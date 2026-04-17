@@ -1,0 +1,233 @@
+# ============================================
+# 无人机双摄像头接收程序
+# 同时显示前视和下视摄像头画面
+# ============================================
+
+import cv2
+import numpy as np
+import requests
+from threading import Thread
+import time
+
+# 摄像头配置
+CAMERAS = {
+    "前视摄像头": {
+        "ip": "192.168.4.1",
+        "port": 80,
+        "stream_url": "http://192.168.4.1/stream",
+        "capture_url": "http://192.168.4.1/capture"
+    },
+    "下视摄像头": {
+        "ip": "192.168.4.1",
+        "port": 81,
+        "stream_url": "http://192.168.4.1:81/stream",
+        "capture_url": "http://192.168.4.1:81/capture"
+    }
+}
+
+class CameraStream:
+    def __init__(self, name, config):
+        self.name = name
+        self.stream_url = config["stream_url"]
+        self.capture_url = config["capture_url"]
+        self.frame = None
+        self.stopped = False
+        self.thread = None
+        
+    def start(self):
+        self.thread = Thread(target=self.update, args=())
+        self.thread.daemon = True
+        self.thread.start()
+        return self
+        
+    def update(self):
+        print(f"🔌 正在连接 {self.name}...")
+        
+        # 尝试连接摄像头
+        stream = None
+        bytes_data = bytes()
+        
+        while not self.stopped:
+            try:
+                # 建立连接
+                response = requests.get(self.stream_url, stream=True, timeout=5)
+                
+                if response.status_code == 200:
+                    print(f"✅ {self.name} 连接成功")
+                    
+                    # 处理视频流
+                    for chunk in response.iter_content(chunk_size=1024):
+                        if self.stopped:
+                            break
+                            
+                        bytes_data += chunk
+                        a = bytes_data.find(b'\xff\xd8')  # JPEG开始标记
+                        b = bytes_data.find(b'\xff\xd9')  # JPEG结束标记
+                        
+                        if a != -1 and b != -1:
+                            jpg = bytes_data[a:b+2]
+                            bytes_data = bytes_data[b+2:]
+                            
+                            # 解码图像
+                            img_array = np.frombuffer(jpg, dtype=np.uint8)
+                            self.frame = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+                            
+                else:
+                    print(f"❌ {self.name} 连接失败: {response.status_code}")
+                    time.sleep(2)
+                    
+            except Exception as e:
+                print(f"⚠️ {self.name} 连接错误: {str(e)}")
+                time.sleep(2)
+                
+    def read(self):
+        return self.frame
+        
+    def stop(self):
+        self.stopped = True
+        if self.thread:
+            self.thread.join()
+            
+    def capture_image(self):
+        """拍摄单张照片"""
+        try:
+            response = requests.get(self.capture_url, timeout=5)
+            if response.status_code == 200:
+                img_array = np.frombuffer(response.content, dtype=np.uint8)
+                return cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+        except:
+            pass
+        return None
+
+def main():
+    print("🚁 无人机双摄像头监控系统")
+    print("=" * 40)
+    
+    # 创建摄像头流
+    cameras = {}
+    for name, config in CAMERAS.items():
+        cameras[name] = CameraStream(name, config)
+        cameras[name].start()
+    
+    # 等待摄像头连接
+    time.sleep(3)
+    
+    print("\n🎥 双摄像头监控系统已启动")
+    print("快捷键:")
+    print("  S - 保存当前画面截图")
+    print("  R - 开始/停止录制视频")
+    print("  F - 切换全屏模式")
+    print("  Q - 退出程序")
+    print("=" * 40)
+    
+    # 视频录制相关
+    recording = False
+    video_writer = None
+    recording_start_time = None
+    fullscreen = False
+    
+    while True:
+        frames = []
+        display_text = []
+        
+        # 获取所有摄像头画面
+        for name, cam in cameras.items():
+            frame = cam.read()
+            if frame is not None:
+                # 添加摄像头名称标签
+                cv2.putText(frame, name, (10, 30), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+                frames.append(frame)
+                display_text.append(f"{name}: ✓ 已连接")
+            else:
+                # 显示连接中画面
+                blank = np.zeros((240, 320, 3), dtype=np.uint8)
+                cv2.putText(blank, f"{name}", (50, 120), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
+                cv2.putText(blank, "连接中...", (80, 160), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+                frames.append(blank)
+                display_text.append(f"{name}: ✗ 连接中...")
+        
+        if frames:
+            # 合并画面（上下排列）
+            if len(frames) == 2:
+                combined = np.vstack(frames)
+            else:
+                combined = frames[0] if frames else np.zeros((480, 320, 3), dtype=np.uint8)
+            
+            # 添加状态信息
+            status_y = 470
+            for text in display_text:
+                cv2.putText(combined, text, (10, status_y), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1)
+                status_y += 25
+            
+            # 添加录制状态
+            if recording:
+                cv2.putText(combined, "● 录制中", (500, 30), 
+                           cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
+            
+            # 显示画面
+            window_name = "无人机双摄像头监控"
+            if fullscreen:
+                cv2.namedWindow(window_name, cv2.WND_PROP_FULLSCREEN)
+                cv2.setWindowProperty(window_name, cv2.WND_PROP_FULLSCREEN, cv2.WINDOW_FULLSCREEN)
+            
+            cv2.imshow(window_name, combined)
+            
+            # 录制视频
+            if recording:
+                if video_writer is None:
+                    # 创建视频写入器
+                    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+                    timestamp = time.strftime("%Y%m%d_%H%M%S")
+                    filename = f"drone_recording_{timestamp}.avi"
+                    video_writer = cv2.VideoWriter(filename, fourcc, 10.0, (combined.shape[1], combined.shape[0]))
+                    recording_start_time = time.time()
+                    print(f"🎬 开始录制: {filename}")
+                
+                video_writer.write(combined)
+            elif video_writer is not None:
+                # 停止录制
+                video_writer.release()
+                video_writer = None
+                duration = time.time() - recording_start_time
+                print(f"⏹️ 停止录制，时长: {duration:.1f}秒")
+                recording_start_time = None
+        
+        # 键盘控制
+        key = cv2.waitKey(1) & 0xFF
+        
+        if key == ord('q') or key == 27:  # Q或ESC退出
+            print("退出程序...")
+            break
+        elif key == ord('s'):  # 保存截图
+            timestamp = time.strftime("%Y%m%d_%H%M%S")
+            for name, cam in cameras.items():
+                frame = cam.capture_image()
+                if frame is not None:
+                    filename = f"{name}_{timestamp}.jpg"
+                    cv2.imwrite(filename, frame)
+                    print(f"📸 已保存: {filename}")
+        elif key == ord('r'):  # 开始/停止录制
+            recording = not recording
+            if not recording and video_writer is not None:
+                video_writer.release()
+                video_writer = None
+        elif key == ord('f'):  # 切换全屏
+            fullscreen = not fullscreen
+            cv2.destroyAllWindows()
+    
+    # 清理资源
+    for cam in cameras.values():
+        cam.stop()
+    
+    if video_writer is not None:
+        video_writer.release()
+    
+    cv2.destroyAllWindows()
+    print("程序已退出")
+
+if __name__ == "__main__":
+    main()
