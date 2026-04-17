@@ -14,7 +14,19 @@ import sys
 import os
 import time
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
+
+# 类型检查导入 (用于Pylance静态分析)
+if TYPE_CHECKING:
+    try:
+        from drone_swarm_system.src.drone_vision_processor import (
+            DroneVisionProcessor, 
+            FrameGroup,
+            OutputManager,
+            create_vision_processor
+        )
+    except ImportError:
+        pass
 
 # 添加项目路径
 PROJECT_ROOT = Path(__file__).parent.absolute()

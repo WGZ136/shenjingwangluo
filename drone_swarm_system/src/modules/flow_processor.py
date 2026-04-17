@@ -8,6 +8,16 @@ import numpy as np
 import cv2
 import sys
 import os
+from typing import TYPE_CHECKING
+
+# 类型检查导入 (用于Pylance静态分析)
+if TYPE_CHECKING:
+    try:
+        from raft import RAFT
+        from utils.utils import InputPadder
+        from utils import flow_viz
+    except ImportError:
+        pass
 
 # 添加RAFT路径 (修复: 同时添加core目录到路径)
 RAFT_DIR = os.path.join(os.path.dirname(__file__), '../../../core_algorithms/RAFT')
@@ -15,14 +25,20 @@ RAFT_CORE_DIR = os.path.join(RAFT_DIR, 'core')
 sys.path.insert(0, RAFT_DIR)
 sys.path.insert(0, RAFT_CORE_DIR)
 
+RAFT_AVAILABLE = False
+RAFT = None
+InputPadder = None
+flow_viz = None
+
 try:
     from raft import RAFT
     from utils.utils import InputPadder
     from utils import flow_viz
+    RAFT_AVAILABLE = True
 except ImportError as e:
     print(f"导入RAFT失败: {e}")
     print("请确保RAFT已正确放置在core_algorithms目录中")
-    raise
+    print("将继续使用传统光流算法")
 
 class FlowProcessor:
     """

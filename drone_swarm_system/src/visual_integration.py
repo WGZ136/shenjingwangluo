@@ -11,10 +11,25 @@
 """
 
 import numpy as np
-from typing import Optional, Dict, List, Tuple, Any, Callable
+from typing import Optional, Dict, List, Tuple, Any, Callable, TYPE_CHECKING
 from dataclasses import dataclass, field
 import warnings
 import time
+
+# 类型检查导入 (用于Pylance静态分析)
+if TYPE_CHECKING:
+    try:
+        import open3d as o3d
+    except ImportError:
+        pass
+
+# 尝试导入Open3D
+o3d = None
+try:
+    import open3d as o3d
+    OPEN3D_AVAILABLE = True
+except ImportError:
+    OPEN3D_AVAILABLE = False
 
 try:
     from neural_processing.neural_perception import NeuralOutput

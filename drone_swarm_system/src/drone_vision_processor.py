@@ -22,11 +22,28 @@ from datetime import datetime
 import json
 import sys
 import os
+from typing import TYPE_CHECKING
 
 import numpy as np
 import cv2
 
+# 类型检查导入 (用于Pylance静态分析)
+if TYPE_CHECKING:
+    try:
+        from monodepth2.networks import ResnetEncoder, DepthDecoder
+        from monodepth2.layers import disp_to_depth
+        from monodepth2.utils import download_model_if_doesnt_exist
+        import open3d as o3d
+    except ImportError:
+        pass
+
 # 尝试导入Monodepth2
+MONODEPTH2_AVAILABLE = False
+ResnetEncoder = None
+DepthDecoder = None
+disp_to_depth = None
+download_model_if_doesnt_exist = None
+
 try:
     # 添加Monodepth2路径
     monodepth_path = Path(__file__).parent.parent.parent / "core_algorithms"
@@ -39,16 +56,17 @@ try:
     MONODEPTH2_AVAILABLE = True
     print("[OK] Monodepth2 模块可用")
 except ImportError as e:
-    MONODEPTH2_AVAILABLE = False
     print(f"[WARN]  Monodepth2 模块不可用: {e}")
     print("   将使用传统算法作为备用")
 
 # 尝试导入 Open3D
+OPEN3D_AVAILABLE = False
+o3d = None
+
 try:
     import open3d as o3d
     OPEN3D_AVAILABLE = True
 except ImportError:
-    OPEN3D_AVAILABLE = False
     print("[WARN] Open3D 未安装，3D可视化功能不可用")
     print("   安装命令: pip install open3d==0.18.0")
 

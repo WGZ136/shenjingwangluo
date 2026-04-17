@@ -8,12 +8,26 @@ import os
 import sys
 import time
 import warnings
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any, TYPE_CHECKING
 from dataclasses import dataclass, field
 from pathlib import Path
 
 import numpy as np
 import cv2
+
+# 类型检查导入 (用于Pylance静态分析)
+if TYPE_CHECKING:
+    try:
+        from drone_swarm_system.src.modules.depth_estimator import Monodepth2Estimator
+        from drone_swarm_system.src.modules.flow_processor import FlowProcessor
+        from drone_swarm_system.src.modules.clustering import TraditionalSegmenter
+        from drone_swarm_system.src.modules.pose_estimator import PoseEstimator
+        from drone_swarm_system.src.modules.geometry_utils import GeometryProcessor
+        from drone_swarm_system.src.utils.visualization import Visualizer
+        from drone_swarm_system.src.visual_integration import VisualIntegration, MotionMatrix
+        from drone_swarm_system.src.esp32_receiver import DualCameraReceiver
+    except ImportError:
+        pass
 
 # 从配置模块导入
 from .config import (
