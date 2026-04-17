@@ -1,0 +1,145 @@
+# 无人机集群视觉感知系统 - 配置文件
+
+# ==================== 系统配置 ====================
+system:
+  name: "DroneSwarmVision"
+  version: "1.0.0"
+  debug: false
+  
+# ==================== 摄像头配置 ====================
+camera:
+  # ESP32-CAM 配置
+  esp32:
+    front_camera:
+      name: "前视摄像头"
+      ip: "192.168.4.1"
+      port: 80
+      stream_url: "http://192.168.4.1/stream"
+      capture_url: "http://192.168.4.1/capture"
+      wifi_ssid: "Drone_Cam_Front"
+      wifi_password: "12345678"
+    
+    down_camera:
+      name: "下视摄像头"
+      ip: "192.168.4.1"
+      port: 81
+      stream_url: "http://192.168.4.1:81/stream"
+      capture_url: "http://192.168.4.1:81/capture"
+      wifi_ssid: "Drone_Cam_Rear"
+      wifi_password: "12345678"
+  
+  # 相机内参 (需要根据实际摄像头标定)
+  intrinsics:
+    fx: 320.0  # 焦距x
+    fy: 320.0  # 焦距y
+    cx: 320.0  # 光心x
+    cy: 240.0  # 光心y
+    width: 640
+    height: 480
+
+# ==================== 神经网络配置 ====================
+neural_network:
+  # 深度估计 (Monodepth2)
+  depth_estimation:
+    enabled: true
+    model_name: "mono+stereo_640x192"
+    model_path: "data/models/monodepth2/"
+    min_depth: 0.1
+    max_depth: 100.0
+    
+  # 光流估计 (RAFT)
+  optical_flow:
+    enabled: true
+    model_path: "data/models/raft/"
+    mixed_precision: true
+    alternate_corr: false
+
+# ==================== 视觉处理配置 ====================
+visual_process:
+  # 点云处理
+  pointcloud:
+    max_depth: 20.0        # 最大深度 (米)
+    min_depth: 0.1         # 最小深度 (米)
+    voxel_size: 0.05       # 体素降采样大小
+    max_points: 100000     # 最大点数
+    
+  # 位姿估计
+  pose_estimation:
+    feature_method: "orb"  # 特征点方法: orb, sift, akaze
+    min_matches: 10
+    ransac_threshold: 3.0
+    
+  # 障碍物检测
+  obstacle_detection:
+    enabled: true
+    safety_distance: 2.0   # 安全距离 (米)
+    warning_distance: 5.0  # 警告距离 (米)
+    fov_horizontal: 90.0   # 水平视场角 (度)
+    fov_vertical: 60.0     # 垂直视场角 (度)
+
+# ==================== 可视化配置 ====================
+visualization:
+  # 3D可视化 (需要Open3D)
+  enable_3d: false
+  point_size: 2
+  background_color: [0.1, 0.1, 0.1]
+  
+  # 2D显示
+  display_size: [1280, 720]
+  show_depth: true
+  show_flow: true
+  show_features: true
+  
+  # 更新频率
+  update_interval: 0.033  # 30 FPS
+
+# ==================== ESP32接收配置 ====================
+esp32_receiver:
+  enabled: true
+  chunk_size: 1024
+  timeout: 5
+  reconnect_delay: 2
+  frame_rate: 10
+
+# ==================== 集群控制配置 ====================
+swarm_control:
+  # 无人机参数
+  drone:
+    max_velocity: 5.0      # 最大速度 (m/s)
+    max_acceleration: 2.0  # 最大加速度 (m/s^2)
+    safety_radius: 1.0     # 安全半径 (米)
+    
+  # 队形控制
+  formation:
+    type: "v_shape"        # 队形类型: v_shape, line, circle, grid
+    spacing: 3.0           # 无人机间距 (米)
+
+# ==================== 数据存储配置 ====================
+data:
+  # 输出目录
+  output_dir: "data/outputs"
+  
+  # 模型目录
+  model_dir: "data/models"
+  
+  # 样本目录
+  sample_dir: "data/samples"
+  
+  # 保存选项
+  save_pointcloud: true
+  save_trajectory: true
+  save_images: false
+  
+  # 录制配置
+  recording:
+    enabled: false
+    format: "mp4"
+    fps: 30
+    quality: "high"
+
+# ==================== 日志配置 ====================
+logging:
+  level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  file: "logs/drone_swarm.log"
+  console: true
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
