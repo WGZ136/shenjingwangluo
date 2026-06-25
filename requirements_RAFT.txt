@@ -1,0 +1,31 @@
+# RAFT Fine-tuning Dependencies
+# Python 3.9 compatible
+# CUDA 12.8 support requires NVIDIA driver >= 535.86.10
+
+# Core Deep Learning Framework (CUDA 12.8 versions)
+torch==2.5.0+cu118
+torchvision==0.20.0+cu118
+
+# RAFT Specific Dependencies
+matplotlib>=3.5.0
+tensorboard>=2.10.0
+scipy==1.13.0
+
+# Vision and Image Processing
+opencv-python==4.9.0.80
+Pillow>=9.0.0
+
+# AirSim Simulation Interface
+airsim==1.8.1
+
+# Basic Scientific Computing
+numpy==1.24.3
+pandas>=2.1.0
+
+# Development and Training Tools
+tqdm>=4.66.0
+h5py>=3.10.0
+
+# Optional: For better compatibility
+pynput>=1.7.0
+msgpack-rpc-python>=0.4.0
