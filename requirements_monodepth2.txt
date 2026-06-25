@@ -1,0 +1,60 @@
+# Monodepth2 AirSim 深度估计 - Python依赖
+# 生成日期: 2026-05-29
+# Python版本: >=3.8
+
+# 核心深度学习框架
+torch==2.11.0
+torchvision==0.26.0
+torchaudio==2.11.0
+
+# 图像处理
+opencv-python==4.13.0.92
+pillow==12.2.0
+scikit-image==0.26.0
+ImageIO==2.37.3
+tifffile==2026.3.3
+
+# 科学计算
+numpy==2.4.4
+scipy==1.17.1
+sympy==1.14.0
+
+# 可视化
+matplotlib==3.10.8
+
+# 训练可视化与日志
+tensorboard==2.20.0
+tensorboardX==2.6.5
+tensorboard-data-server==0.7.2
+
+# AirSim通信
+msgpack-rpc-python==0.4.1
+msgpack-python==0.5.6
+tornado==4.5.3
+
+# 工具库
+tqdm==4.67.3
+networkx==3.6.1
+
+# 以下依赖由上述包自动引入，通常无需单独安装
+# absl-py==2.4.0
+# colorama==0.4.6
+# contourpy==1.3.3
+# cycler==0.12.1
+# filelock==3.28.0
+# fonttools==4.62.1
+# fsspec==2026.3.0
+# grpcio==1.80.0
+# Jinja2==3.1.6
+# kiwisolver==1.5.0
+# lazy-loader==0.5
+# Markdown==3.10.2
+# MarkupSafe==3.0.3
+# mpmath==1.3.0
+# packaging==26.1
+# protobuf==7.34.1
+# pyparsing==3.3.2
+# python-dateutil==2.9.0.post0
+# six==1.17.0
+# typing_extensions==4.15.0
+# Werkzeug==3.1.8
