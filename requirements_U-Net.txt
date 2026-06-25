@@ -1,0 +1,18 @@
+# ====== 深度学习核心框架 ======
+# PyTorch 2.7.0 — 首个原生支持 CUDA 12.8 的稳定版（使用预编译 cu128 wheel）
+torch==2.7.0+cu128
+torchvision==0.22.0+cu128
+
+# ====== 分割模型库 ======
+segmentation-models-pytorch==0.5.0
+
+# ====== 科学计算与图像处理 ======
+numpy==2.2.4
+opencv-python==4.10.0.84
+pillow==11.3.0
+matplotlib==3.9.4
+
+# ====== 训练辅助工具 ======
+tqdm==4.67.1
+tensorboard==2.18.0
+scikit-learn==1.5.2
